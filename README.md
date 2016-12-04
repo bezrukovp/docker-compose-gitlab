@@ -10,6 +10,7 @@
 
 1. В папке ```./env``` находятся файлы окружения. Для каждого из них следует создать одноимённый файл конфигурации без суффикса ```.dist``` в имени файла и настроить в них переменные окружения.
 2. В папке ```./certs``` создать сертификаты инструкция [ниже](#self-signed-certificate)...
+3. Создать файл конфигурации gitlab-runner ```./runner/config/config.toml```
 
 ### Signed Certificate
 If you have a signed certificate from a Trusted Certificate Authority you need only to copy the files in then `certs` folder and mount the folder in both containers (gitlab,registry) like in the docker-compose example.
