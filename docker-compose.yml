@@ -15,8 +15,8 @@ services:
     volumes:
       - ./postgresql:/var/lib/postgresql:Z
     env_file:
-      - ./env/postgresql.common.env
-      - ./env/postgresql.secrets.env
+      - ./env/postgresql.dist.env
+      - ./env/postgresql.env
 
   gitlab:
     restart: always
@@ -33,8 +33,8 @@ services:
       - ./logs:/var/log/gitlab
       - ./certs:/certs
     env_file:
-      - ./env/gitlab.common.env
-      - ./env/gitlab.secrets.env
+      - ./env/gitlab.dist.env
+      - ./env/gitlab.env
 
   runner:
     image: gitlab/gitlab-runner:latest
@@ -50,5 +50,5 @@ services:
       - ./gitlab/shared/registry:/registry
       - ./certs:/certs
     env_file:
-      - ./env/registry.common.env
-      - ./env/registry.secrets.env
+      - ./env/registry.dist.env
+      - ./env/registry.env

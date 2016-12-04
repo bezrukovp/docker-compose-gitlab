@@ -22,8 +22,9 @@ Thumbs.db
 !/runner/config
 /runner/config/*
 
-!*.env
-*.secrets.env
+.env
+/env/*
+!/env/*.dist.env
 
 **/local/*
 !.gitkeep
