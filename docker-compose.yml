@@ -1,0 +1,54 @@
+version: '2'
+
+services:
+  redis:
+    restart: always
+    image: sameersbn/redis:latest
+    command:
+      - --loglevel warning
+    volumes:
+      - ./redis:/var/lib/redis:Z
+
+  postgresql:
+    restart: always
+    image: sameersbn/postgresql:9.5-3
+    volumes:
+      - ./postgresql:/var/lib/postgresql:Z
+    env_file:
+      - ./env/postgresql.common.env
+      - ./env/postgresql.secrets.env
+
+  gitlab:
+    restart: always
+    image: sameersbn/gitlab:8.14.2
+    depends_on:
+      - redis
+      - postgresql
+    ports:
+      - "40180:80"
+      - "5500:5500"
+      - "40122:22"
+    volumes:
+      - ./gitlab:/home/git/data:Z
+      - ./logs:/var/log/gitlab
+      - ./certs:/certs
+    env_file:
+      - ./env/gitlab.common.env
+      - ./env/gitlab.secrets.env
+
+  runner:
+    image: gitlab/gitlab-runner:latest
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./runner/config:/etc/gitlab-runner
+
+  registry:
+    restart: always
+    image: registry:2.4.1
+    volumes:
+      - ./gitlab/shared/registry:/registry
+      - ./certs:/certs
+    env_file:
+      - ./env/registry.common.env
+      - ./env/registry.secrets.env
