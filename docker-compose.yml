@@ -11,7 +11,9 @@ services:
 
   postgresql:
     restart: always
-    image: sameersbn/postgresql:9.5-3
+    image: sameersbn/postgresql:latest
+    ports:
+      - "5432:5432"
     volumes:
       - ./postgresql:/var/lib/postgresql:Z
     env_file:
@@ -20,7 +22,7 @@ services:
 
   gitlab:
     restart: always
-    image: sameersbn/gitlab:8.14.2
+    image: sameersbn/gitlab:latest
     depends_on:
       - redis
       - postgresql
@@ -45,7 +47,7 @@ services:
 
   registry:
     restart: always
-    image: registry:2.4.1
+    image: registry:latest
     volumes:
       - ./gitlab/shared/registry:/registry
       - ./certs:/certs
