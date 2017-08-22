@@ -1,0 +1,34 @@
+version: '2'
+services:
+
+  redis:
+    scale: 1
+    start_on_create: true
+
+  postgresql:
+    scale: 1
+    start_on_create: true
+
+  gitlab:
+    scale: 1
+    health_check:
+      interval: 5000
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 80
+      unhealthy_threshold: 3
+      strategy: recreate
+
+  registry:
+    scale: 1
+    start_on_create: true
+    health_check:
+      interval: 60000
+      healthy_threshold: 2
+      response_timeout: 2000
+      port: 5000
+      unhealthy_threshold: 3
+      strategy: recreate
+
+  runner:
+    scale: 1

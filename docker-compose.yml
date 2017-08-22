@@ -2,27 +2,37 @@ version: '2'
 
 services:
   redis:
-    restart: always
     image: sameersbn/redis:latest
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
     command:
       - --loglevel warning
     volumes:
-      - ./redis:/var/lib/redis:Z
+      - ${PWD}/redis:/var/lib/redis:Z
+    labels:
+      io.rancher.container.pull_image: always
 
   postgresql:
-    restart: always
     image: sameersbn/postgresql:latest
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
     ports:
       - "5432:5432"
     volumes:
-      - ./postgresql:/var/lib/postgresql:Z
+      - ${PWD}/postgresql:/var/lib/postgresql:Z
     env_file:
-      - ./env/postgresql.dist.env
-      - ./env/postgresql.env
+      - ${PWD}/env/postgresql.dist.env
+      - ${PWD}/env/postgresql.env
+    labels:
+      io.rancher.container.pull_image: always
 
   gitlab:
-    restart: always
     image: sameersbn/gitlab:latest
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
     depends_on:
       - redis
       - postgresql
@@ -31,26 +41,37 @@ services:
       - "5500:5500"
       - "40122:22"
     volumes:
-      - ./gitlab:/home/git/data:Z
-      - ./logs:/var/log/gitlab
-      - ./certs:/certs
+      - ${PWD}/gitlab:/home/git/data:Z
+      - ${PWD}/logs:/var/log/gitlab
+      - ${PWD}/certs:/certs
     env_file:
-      - ./env/gitlab.dist.env
-      - ./env/gitlab.env
+      - ${PWD}/env/gitlab.dist.env
+      - ${PWD}/env/gitlab.env
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.sidekicks: redis, postgresql, registry
+
+  registry:
+    image: registry:latest
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    volumes:
+      - ${PWD}/gitlab/shared/registry:/registry
+      - ${PWD}/certs:/certs
+    env_file:
+      - ${PWD}/env/registry.dist.env
+      - ${PWD}/env/registry.env
+    labels:
+      io.rancher.container.pull_image: always
 
   runner:
     image: gitlab/gitlab-runner:latest
-    restart: always
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./runner/config:/etc/gitlab-runner
-
-  registry:
-    restart: always
-    image: registry:latest
-    volumes:
-      - ./gitlab/shared/registry:/registry
-      - ./certs:/certs
-    env_file:
-      - ./env/registry.dist.env
-      - ./env/registry.env
+      - ${PWD}/runner/config:/etc/gitlab-runner
+    labels:
+      io.rancher.container.pull_image: always
