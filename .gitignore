@@ -9,18 +9,7 @@ Thumbs.db
 *-.*
 
 /certs/*
-/gitlab/*
-!/gitlab/shared
-/gitlab/shared/*
-!/gitlab/shared/registry
-/gitlab/shared/registry/*
-/logs/*
-/postgresql/*
-/redis/*
-/registry/*
 /runner/*
-!/runner/config
-/runner/config/*
 
 .env
 /env/*

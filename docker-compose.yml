@@ -8,23 +8,25 @@ services:
     stdin_open: true
     command:
       - --loglevel warning
+    expose:
+      - "6379"
     volumes:
-      - ${PWD}/redis:/var/lib/redis:Z
+      - redis:/var/lib/redis:Z
     labels:
       io.rancher.container.pull_image: always
 
-  postgresql:
+  postgres:
     image: sameersbn/postgresql:latest
     restart: unless-stopped
     tty: true
     stdin_open: true
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
-      - ${PWD}/postgresql:/var/lib/postgresql:Z
+      - postgres:/var/lib/postgresql/data:Z
     env_file:
-      - ${PWD}/env/postgresql.dist.env
-      - ${PWD}/env/postgresql.env
+      - ${PWD}/env/postgres.dist.env
+      - ${PWD}/env/postgres.env
     labels:
       io.rancher.container.pull_image: always
 
@@ -35,30 +37,35 @@ services:
     tty: true
     depends_on:
       - redis
-      - postgresql
-    ports:
-      - "40180:80"
-      - "5500:5500"
-      - "40122:22"
+      - postgres
+    expose:
+      - "22"
+      - "80"
+      - "5500"
     volumes:
-      - ${PWD}/gitlab:/home/git/data:Z
-      - ${PWD}/logs:/var/log/gitlab
+      #- /etc/letsencrypt/production/certs:/certs:ro
       - ${PWD}/certs:/certs
+      - data:/home/git/data:Z
+      - log:/var/log/gitlab
     env_file:
       - ${PWD}/env/gitlab.dist.env
       - ${PWD}/env/gitlab.env
     labels:
+      service: gitlab
       io.rancher.container.pull_image: always
-      io.rancher.sidekicks: redis, postgresql, registry
+      io.rancher.sidekicks: redis, registry, postgres
 
   registry:
     image: registry:latest
     restart: unless-stopped
     tty: true
     stdin_open: true
+    expose:
+      - "5000"
     volumes:
-      - ${PWD}/gitlab/shared/registry:/registry
+      #- /etc/letsencrypt/production/certs:/certs:ro
       - ${PWD}/certs:/certs
+      - registry:/registry
     env_file:
       - ${PWD}/env/registry.dist.env
       - ${PWD}/env/registry.env
@@ -71,7 +78,19 @@ services:
     tty: true
     stdin_open: true
     volumes:
+      - ${PWD}/runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${PWD}/runner/config:/etc/gitlab-runner
     labels:
       io.rancher.container.pull_image: always
+
+volumes:
+  data:
+    driver: "local"
+  log:
+    driver: "local"
+  postgres:
+    driver: "local"
+  redis:
+    driver: "local"
+  registry:
+    driver: "local"
